@@ -1,0 +1,393 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Memorama Multijugador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #F7A8C4;
+        }
+
+        h1 {
+            background-color: #3D0301;
+            color: white;
+            padding: 20px;
+        }
+
+        #nombrejugador {
+            background-color: #FFB8E0;
+            padding: 20px;
+            border-radius: 15px;
+            width: 300px;
+            margin: 50px auto;
+            text-align: center;
+            font-family: 'Segoe UI', sans-serif;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+            #nombrejugador label {
+                display: block;
+                font-size: 18px;
+                margin-bottom: 10px;
+                color: #6B004E;
+            }
+
+            #nombrejugador input[type="text"] {
+                padding: 10px;
+                font-size: 16px;
+                width: 90%;
+                border: 2px solid #EC7FA9;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+
+            #nombrejugador button {
+                background-color: #EC7FA9;
+                color: white;
+                padding: 12px 20px;
+                font-size: 16px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+                #nombrejugador button:hover {
+                    background-color: #d46b98;
+                }
+
+        .jugadores-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .jugador-info {
+            flex: 1;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .turno {
+            margin: 15px auto 0 auto;
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 15px;
+            display: block;
+            width: fit-content;
+        }
+
+        .inactive {
+            background-color: #f1c1da;
+            color: #555;
+        }
+
+        .active {
+            background-color: #EC7FA9;
+            color: white;
+        }
+
+        .estado {
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: lightgray;
+            border: 2px solid #333;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+            .cell:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+        #btn-reiniciar {
+            background-color: #F48CB6;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+            #btn-reiniciar:hover {
+                background-color: #e67aa5;
+                transform: scale(1.05);
+            }
+    </style>
+</head>
+<body>
+    <h1>🧠 Memorama Multijugador 🧠</h1>
+
+    <div id="nombrejugador">
+        <label>Ingresa tu nombre: </label>
+        <input type="text" id="player-name" />
+        <button onclick="registrarJugador()">Ingresar</button>
+    </div>
+
+    <div id="info-jugadores">
+        <div class="jugadores-container">
+            <div class="jugador-info">
+                <p><strong>Jugador 1:</strong> <span id="player1Name">Esperando...</span></p>
+                <p>Cartas: <span id="player1Cards">0</span></p>
+
+                <div id="comentariofinal1" class="estado"></div>
+                <div id="estadoJuego1" class="estado"></div>
+
+            </div>
+            <div class="jugador-info">
+                <p><strong>Jugador 2:</strong> <span id="player2Name">Esperando...</span></p>
+                <p>Cartas: <span id="player2Cards">0</span></p>
+                <div id="comentariofinal2" class="estado"></div>
+
+                <div id="estadoJuego2" class="estado"></div>
+            </div>
+        </div>
+
+        <div id="turno" class="turno inactive">
+            Turno de: <span id="currentPlayer">Esperando...</span>
+        </div>
+    </div>
+
+    <div>
+        <div id="desconexion" class="estado"></div>
+
+        <button id="btn-reiniciar" style="display:none" onclick="reiniciarJuego()">Reiniciar juego</button>
+    </div>
+
+    <section id="board" class="board">
+        <button class="cell" id="cell-0" data-index="0"></button>
+        <button class="cell" id="cell-1" data-index="1"></button>
+        <button class="cell" id="cell-2" data-index="2"></button>
+        <button class="cell" id="cell-3" data-index="3"></button>
+        <button class="cell" id="cell-4" data-index="4"></button>
+        <button class="cell" id="cell-5" data-index="5"></button>
+        <button class="cell" id="cell-6" data-index="6"></button>
+        <button class="cell" id="cell-7" data-index="7"></button>
+        <button class="cell" id="cell-8" data-index="8"></button>
+        <button class="cell" id="cell-9" data-index="9"></button>
+        <button class="cell" id="cell-10" data-index="10"></button>
+        <button class="cell" id="cell-11" data-index="11"></button>
+    </section>
+
+    <script>
+        console.log("Iniciando JS...");
+
+        let jugadorId = null;
+        let intervalo;
+        let cartasVolteadas = 0;
+        let bloqueado = false;
+        let jugadoresConectados = 0;
+        const imagenes = [
+            'Assets/Img/Img1.jpg',
+            'Assets/Img/Img2.jpg',
+            'Assets/Img/Img3.jpg',
+            'Assets/Img/Img4.jpg',
+            'Assets/Img/Img5.jpg',
+            'Assets/Img/Img6.jpg'
+        ];
+
+        imagenes.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+
+        async function actualizarEstado() {
+            const res = await fetch(`/estado?jugadorId=${jugadorId}`);
+            const data = await res.json();
+
+            if (!data || !data.jugadores || data.jugadores.length < 1) {
+                console.error("Respuesta inválida del servidor", data);
+                return;
+            }
+
+            document.getElementById("player1Name").textContent = data.jugadores[0] || "Esperando...";
+            document.getElementById("player2Name").textContent = data.jugadores[1] || "Esperando...";
+            document.getElementById("player1Cards").textContent = data.pares[0] || 0;
+            document.getElementById("player2Cards").textContent = data.pares[1] || 0;
+            document.getElementById("currentPlayer").textContent = data.turnoActualNombre || "Esperando...";
+            document.getElementById("turno").className = "turno " + (data.turnoActualId == jugadorId ? "active" : "inactive");
+
+            jugadoresConectados = data.jugadores.filter(n => n !== null).length;
+            // Mostrar u ocultar el turno según los jugadores conectados
+            const turnoDiv = document.getElementById("turno");
+            if (jugadoresConectados < 2) {
+                turnoDiv.style.display = "none";
+            } else {
+                turnoDiv.style.display = "block";
+            }
+
+            for (let i = 0; i < data.cartas.length; i++) {
+                const carta = data.cartas[i];
+                const btn = document.getElementById("cell-" + i);
+
+                if (carta.mostrando || carta.encontrada) {
+                    btn.style.backgroundImage = `url('Assets/Img/${carta.imagen}')`;
+                } else {
+                    btn.style.backgroundImage = "";
+                }
+                btn.disabled = carta.encontrada || data.turnoActualId != jugadorId || jugadoresConectados < 2;
+                btn.style.opacity = btn.disabled ? "0.5" : "1";
+                btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+            }
+
+            //const estadoDiv = document.getElementById("estadoJuego");
+            //if (data.estado && data.estado.trim() !== "") {
+            //    estadoDiv.textContent = data.estado;
+            //    estadoDiv.style.display = "block";
+            //} else {
+            //    estadoDiv.style.display = "none";
+            //}
+            const estado1 = document.getElementById("estadoJuego1");
+            const estado2 = document.getElementById("estadoJuego2");
+
+            estado1.textContent = "";
+            estado2.textContent = "";
+
+            if (data.estado && data.estado.trim() !== "") {
+                const estadoTexto = data.estado.trim();
+
+                if (estadoTexto === "Esperando jugador 2") {
+                    if (jugadorId === 1) {
+                        estado2.textContent = "Esperando jugador 2...";
+                    }
+
+                } else if (estadoTexto === "Cambiando turno...") {
+                    estado1.textContent = estadoTexto;
+                    estado2.textContent = estadoTexto;
+                }
+            }
+
+            if (data.estado && (data.estado.includes("gana") || data.estado.includes("Empate"))) {
+                const comentario1 = document.getElementById("comentariofinal1");
+                const comentario2 = document.getElementById("comentariofinal2");
+
+                if (data.estado.includes("Empate")) {
+                    comentario1.textContent = "¡Empate!";
+                    comentario2.textContent = "¡Empate!";
+                    document.getElementById("btn-reiniciar").style.display = "inline-block";
+                } else {
+                    const ganadorNombre = data.estado.replace("¡", "").replace("gana!", "").trim();
+
+                    const nombre1 = document.getElementById("player1Name").textContent.trim();
+                    const nombre2 = document.getElementById("player2Name").textContent.trim();
+
+                    if (ganadorNombre === nombre1) {
+                        comentario1.textContent = "¡Ganaste!";
+                        comentario2.textContent = "Perdiste";
+                        document.getElementById("btn-reiniciar").style.display = "inline-block";
+                    } else if (ganadorNombre === nombre2) {
+                        comentario2.textContent = "¡Ganaste!";
+                        comentario1.textContent = "Perdiste";
+                        document.getElementById("btn-reiniciar").style.display = "inline-block";
+                    }
+                }
+                document.querySelectorAll(".cell").forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.5";
+                    btn.style.cursor = "not-allowed";
+                });
+            } else {
+                document.getElementById("comentariofinal1").textContent = "";
+                document.getElementById("comentariofinal2").textContent = "";
+            }
+
+        }
+
+        async function registrarJugador() {
+            const nombre = document.getElementById("player-name").value;
+            if (!nombre) return alert("Escribe tu nombre");
+
+            const res = await fetch('/conectar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre })
+            });
+
+            const data = await res.json();
+            jugadorId = data.id || data.jugadorId;
+
+            console.log("Jugador registrado con ID:", jugadorId);
+
+            await actualizarEstado();
+            if (!intervalo) {
+                intervalo = setInterval(actualizarEstado, 1000);
+            }
+        }
+        document.querySelectorAll(".cell").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                if (bloqueado) return;
+
+                const posicion = btn.getAttribute("data-index");
+
+                const datos = await fetch(`/voltear?jugadorId=${jugadorId}&pos=${posicion}`)
+                    .then(r => r.json());
+                console.log("Respuesta de voltear:", datos);
+
+                if (datos.exito) {
+                    cartasVolteadas++;
+
+                    //    if (cartasVolteadas === 2) {
+                    //        bloqueado = true;
+
+                    //        // Espera 1 segundo para que el jugador vea la segunda carta
+                    //        setTimeout(async () => {
+                    //            await actualizarEstado();
+                    //            cartasVolteadas = 0;
+                    //            bloqueado = false;
+                    //        }, 1500);
+                    //    }
+
+                    await actualizarEstado();
+
+                    if (cartasVolteadas === 2) {
+                        bloqueado = true;
+
+                        setTimeout(async () => {
+                            await actualizarEstado();
+                            cartasVolteadas = 0;
+                            bloqueado = false;
+                        }, 1000);
+                    }
+                }
+            });
+        });
+
+        function reiniciarJuego() {
+            const confirmacion = confirm("¿Estás seguro de que quieres reiniciar el juego?");
+            if (!confirmacion) return;
+
+            jugadorId = null;
+            clearInterval(intervalo);
+            intervalo = null;
+            location.reload(); // Solo recarga la página del jugador actual
+        }
+
+
+    </script>
+</body>
+</html>
