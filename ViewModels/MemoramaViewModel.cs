@@ -52,48 +52,19 @@ namespace MemoramaUnidad2HTTP_8._1G.ViewModels
         {
             return new
             {
-                jugadores = new[]
-                {
-            new {
-                id = Sesion.Jugador1?.Id ?? -1,
-                nombre = Sesion.Jugador1?.Nombre ?? "",
-                pares = Sesion.Jugador1?.CartasEncontradas ?? 0
-            },
-            new {
-                id = Sesion.Jugador2?.Id ?? -1,
-                nombre = Sesion.Jugador2?.Nombre ?? "",
-                pares = Sesion.Jugador2?.CartasEncontradas ?? 0
-            }
-        },
+                jugadores = new[] { Sesion.Jugador1?.Nombre ?? "", Sesion.Jugador2?.Nombre ?? "" },
+                pares = new[] { Sesion.Jugador1?.CartasEncontradas ?? 0, Sesion.Jugador2?.CartasEncontradas ?? 0 },
                 turnoActualId = Sesion.TurnoActual,
                 turnoActualNombre = Sesion.TurnoActual == 1 ? Sesion.Jugador1?.Nombre : Sesion.Jugador2?.Nombre,
                 estado = Sesion.EstadoTexto,
-                puedeComenzar = (Sesion.Jugador1 != null && Sesion.Jugador2 != null),
-                cartas = Sesion.ObtenerCartas().Select(c => new {
-                    indice = c.Indice,
+                cartas = Sesion.ObtenerCartas().Select(c => new
+                {
                     imagen = (c.Descubierta || Sesion.CartasDescubiertas.Contains(c.Indice)) ? c.Imagen : null,
                     mostrando = c.Descubierta,
                     encontrada = Sesion.CartasDescubiertas.Contains(c.Indice)
-                }).ToList()
+
+                })
             };
         }
-
-        //public object ObtenerEstadoExtendido()
-        //{
-        //    return new
-        //    {
-        //        jugadores = new[] { Sesion.Jugador1?.Nombre ?? "", Sesion.Jugador2?.Nombre ?? "" },
-        //        pares = new[] { Sesion.Jugador1?.CartasEncontradas ?? 0, Sesion.Jugador2?.CartasEncontradas ?? 0 },
-        //        turnoActualId = Sesion.TurnoActual,
-        //        turnoActualNombre = Sesion.TurnoActual == 1 ? Sesion.Jugador1?.Nombre : Sesion.Jugador2?.Nombre,
-        //        estado = Sesion.EstadoTexto,
-        //        cartas = Sesion.ObtenerCartas().Select(c => new {
-        //            imagen = (c.Descubierta || Sesion.CartasDescubiertas.Contains(c.Indice)) ? c.Imagen : null,
-        //            mostrando = c.Descubierta,
-        //            encontrada = Sesion.CartasDescubiertas.Contains(c.Indice)
-
-        //        })
-        //    };
-        //}
     }
 }
