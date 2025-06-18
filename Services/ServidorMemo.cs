@@ -150,31 +150,6 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
             }
         }
 
-        //private async Task RutaConectar(HttpListenerContext ctx)
-        //{
-
-        //    using var reader = new StreamReader(ctx.Request.InputStream);
-        //    string jsonRecibido = await reader.ReadToEndAsync();
-        //    var data = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonRecibido); if (!data.ContainsKey("nombre") || string.IsNullOrWhiteSpace(data["nombre"]))
-        //    {
-        //        ctx.Response.StatusCode = 400;
-        //        byte[] error = Encoding.UTF8.GetBytes("Nombre inválido");
-        //        await ctx.Response.OutputStream.WriteAsync(error, 0, error.Length);
-        //        return;
-        //    }
-        //    string nombre = data["nombre"];
-        //    var jugador = juego.Conectar(nombre);
-
-        //    var respuesta = new
-        //    {
-        //        jugadorId = jugador.Id,
-        //        nombre = jugador.Nombre
-        //    };
-        //    string json = JsonSerializer.Serialize(respuesta);
-        //    byte[] buffer = Encoding.UTF8.GetBytes(json);
-        //    ctx.Response.ContentType = "application/json";
-        //    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-        //}
         private async Task RutaConectar(HttpListenerContext ctx)
         {
             using var reader = new StreamReader(ctx.Request.InputStream);
@@ -226,14 +201,6 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
             await ctx.Response.OutputStream.WriteAsync(buffer);
         }
 
-        //private async Task RutaEstado(HttpListenerContext ctx)
-        //{
-        //    var estadoExtendido = juego.ObtenerEstadoExtendido();
-        //    string json = JsonSerializer.Serialize(estadoExtendido);
-        //    byte[] buffer = Encoding.UTF8.GetBytes(json);
-        //    ctx.Response.ContentType = "application/json";
-        //    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-        //}
         private async Task RutaEstado(HttpListenerContext ctx)
         {
             var query = ctx.Request.QueryString;
@@ -257,29 +224,6 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
             ctx.Response.ContentType = "application/json";
             await ctx.Response.OutputStream.WriteAsync(buffer);
         }
-
-        //private async Task RutaVoltear(HttpListenerContext ctx)
-        //{
-        //    var query = ctx.Request.QueryString;
-        //    int jugadorId = int.Parse(query["jugadorId"]);
-        //    int posicion = int.Parse(query["pos"]);
-
-        //    var resultado = juego.VoltearCarta(jugadorId, posicion);
-
-        //    if (resultado != null && resultado.TryGetValue("imagen", out object imagenObj))
-        //    {
-        //        if (imagenObj is string nombreImagen && !string.IsNullOrEmpty(nombreImagen))
-        //        {
-        //            resultado["imagen"] = $"Assets/Img/{nombreImagen}";
-        //        }
-        //    }
-
-
-        //    string json = JsonSerializer.Serialize(resultado);
-        //    byte[] buffer = Encoding.UTF8.GetBytes(json);
-        //    ctx.Response.ContentType = "application/json";
-        //    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-        //}
 
         private async Task RutaVoltear(HttpListenerContext ctx)
         {

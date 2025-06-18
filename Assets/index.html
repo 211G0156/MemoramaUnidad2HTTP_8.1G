@@ -122,6 +122,32 @@
                 opacity: 0.4;
                 cursor: not-allowed;
             }
+            .cell.flip {
+                animation: girar 0.5s ease forwards;
+            }
+
+        @keyframes girar {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateY(180deg);
+            }
+        }
+        .unflip {
+            animation: unflip 0.5s forwards;
+        }
+
+        @keyframes unflip {
+            0% {
+                transform: rotateY(180deg);
+            }
+
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
         #btn-reiniciar {
             background-color: #F48CB6;
             color: white;
@@ -194,8 +220,14 @@
         <button class="cell" id="cell-11" data-index="11"></button>
     </section>
 
+    <audio id="musicaFondo" src="Assets/Mus/fondo.mp3" loop></audio>
+    <audio id="correctSound" src="Assets/Mus/correct.mp3"></audio>
+    <audio id="errorSound" src="Assets/Mus/error.mp3"></audio>
+
     <script>
-        console.log("Iniciando JS...");
+
+        let paresTotalesAnteriores = 0;
+        let ultimoPares = 0;
 
         let jugadorId = null;
         let intervalo;
@@ -210,7 +242,8 @@
             'Assets/Img/Img5.jpg',
             'Assets/Img/Img6.jpg'
         ];
-
+        const correctSound = document.getElementById("correctSound");
+        const errorSound = document.getElementById("errorSound");
         imagenes.forEach(src => {
             const img = new Image();
             img.src = src;
@@ -233,7 +266,7 @@
             document.getElementById("turno").className = "turno " + (data.turnoActualId == jugadorId ? "active" : "inactive");
 
             jugadoresConectados = data.jugadores.filter(n => n !== null).length;
-            // Mostrar u ocultar el turno según los jugadores conectados
+
             const turnoDiv = document.getElementById("turno");
             if (jugadoresConectados < 2) {
                 turnoDiv.style.display = "none";
@@ -247,21 +280,26 @@
 
                 if (carta.mostrando || carta.encontrada) {
                     btn.style.backgroundImage = `url('Assets/Img/${carta.imagen}')`;
+                    btn.classList.add("flip");
+
                 } else {
                     btn.style.backgroundImage = "";
+                    btn.classList.remove("flip");
                 }
                 btn.disabled = carta.encontrada || data.turnoActualId != jugadorId || jugadoresConectados < 2;
                 btn.style.opacity = btn.disabled ? "0.5" : "1";
                 btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+
+                if (carta.encontrada) {
+                    btn.style.border = "2px solid black";
+                } else if (carta.mostrando) {
+                    btn.style.border = "4px dashed green";
+                } else {
+                    btn.style.border = "2px solid #333";
+                }
             }
 
-            //const estadoDiv = document.getElementById("estadoJuego");
-            //if (data.estado && data.estado.trim() !== "") {
-            //    estadoDiv.textContent = data.estado;
-            //    estadoDiv.style.display = "block";
-            //} else {
-            //    estadoDiv.style.display = "none";
-            //}
+
             const estado1 = document.getElementById("estadoJuego1");
             const estado2 = document.getElementById("estadoJuego2");
 
@@ -333,6 +371,21 @@
 
             console.log("Jugador registrado con ID:", jugadorId);
 
+
+            const musica = document.getElementById("musicaFondo");
+            if (musica) {
+                musica.volume = 0.5;
+                musica.play().catch(err => {
+                    console.warn("El navegador bloqueó el autoplay, espera clic del usuario");
+                });
+            }
+
+            document.getElementById("player-name").disabled = true;
+            document.querySelector("#nombrejugador button").disabled = true;
+            document.querySelector("#nombrejugador button").style.opacity = "0.5";
+            document.querySelector("#nombrejugador button").style.cursor = "not-allowed";
+
+
             await actualizarEstado();
             if (!intervalo) {
                 intervalo = setInterval(actualizarEstado, 1000);
@@ -342,25 +395,22 @@
             btn.addEventListener("click", async () => {
                 if (bloqueado) return;
 
+                if (jugadoresConectados < 2) return;
+
+
+                const flipSound = new Audio("Assets/Mus/flipcard.mp3");
+                flipSound.play();
+
+
                 const posicion = btn.getAttribute("data-index");
 
                 const datos = await fetch(`/voltear?jugadorId=${jugadorId}&pos=${posicion}`)
                     .then(r => r.json());
-                console.log("Respuesta de voltear:", datos);
 
+                console.log("Respuesta de voltear:", datos);
                 if (datos.exito) {
                     cartasVolteadas++;
-
-                    //    if (cartasVolteadas === 2) {
-                    //        bloqueado = true;
-
-                    //        // Espera 1 segundo para que el jugador vea la segunda carta
-                    //        setTimeout(async () => {
-                    //            await actualizarEstado();
-                    //            cartasVolteadas = 0;
-                    //            bloqueado = false;
-                    //        }, 1500);
-                    //    }
+}
 
                     await actualizarEstado();
 
@@ -368,7 +418,20 @@
                         bloqueado = true;
 
                         setTimeout(async () => {
+                            const antes = paresTotalesAnteriores;
+
                             await actualizarEstado();
+
+                            const despues = (document.getElementById("player1Cards").textContent * 1) +
+                                (document.getElementById("player2Cards").textContent * 1);
+
+                            if (despues > antes) {
+                                correctSound.play();
+                            } else {
+                                errorSound.play();
+                            }
+
+                            paresTotalesAnteriores = despues;
                             cartasVolteadas = 0;
                             bloqueado = false;
                         }, 1000);
@@ -378,16 +441,20 @@
         });
 
         function reiniciarJuego() {
-            const confirmacion = confirm("¿Estás seguro de que quieres reiniciar el juego?");
-            if (!confirmacion) return;
 
+            const musica = document.getElementById("musicaFondo");
+            if (musica) musica.pause();
             jugadorId = null;
             clearInterval(intervalo);
             intervalo = null;
-            location.reload(); // Solo recarga la página del jugador actual
+            location.reload();
         }
 
-
+        document.querySelectorAll(".cell").forEach(btn => {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            btn.style.cursor = "not-allowed";
+        });
     </script>
 </body>
 </html>

@@ -154,49 +154,6 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
         }
 
 
-        //public object VoltearCarta(int idJugador, int posicion)
-        //{
-        //    if (Estado != EstadoJuego.EnCurso || TurnoActual != idJugador)
-        //        return new { exito = false, mensaje = "No es tu turno o el juego no está en curso." };
-
-        //    if (posicion < 0 || posicion >= tablero.Length || descubiertas[posicion] || CartasDescubiertas.Contains(posicion))
-        //        return new { exito = false, mensaje = "Carta inválida o ya descubierta." };
-
-        //    cartaVolteada = posicion;
-
-        //    CartasDescubiertas.Add(posicion);
-
-        //    if (CartasDescubiertas.Count == 2)
-        //    {
-        //        var i1 = CartasDescubiertas[0];
-        //        var i2 = CartasDescubiertas[1];
-
-        //        if (tablero[i1] == tablero[i2])
-        //        {
-        //            descubiertas[i1] = true;
-        //            descubiertas[i2] = true;
-
-        //            if (idJugador == 1) Jugador1!.CartasEncontradas++;
-        //            else Jugador2!.CartasEncontradas++;
-
-        //            CartasDescubiertas.Clear();
-        //            cartaVolteada = null;
-        //        }
-        //        else
-        //        {
-        //            Estado = EstadoJuego.EsperandoCambioTurno;
-        //        }
-
-        //        CambiarTurnoSiEsNecesario();
-        //    }
-        //    mostrando[posicion] = true;
-        //    return new
-        //    {
-        //        exito = true,
-        //        imagen = "Assets/Img/" + tablero[posicion],
-        //        indice = posicion
-        //    };
-        //}
 
         public JugadorDTO ObtenerOtroJugador(int actual)
         {
@@ -229,30 +186,6 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
             };
         }
 
-        //public EstadoJuegoDTO ObtenerEstado()
-        //{
-        //    CambiarTurnoSiEsNecesario();
-
-        //    return new EstadoJuegoDTO
-        //    {
-        //        Jugador1 = Jugador1 != null ? new JugadorDTO
-        //        {
-        //            Id = Jugador1.Id,
-        //            Nombre = Jugador1.Nombre,
-        //            CartasEncontradas = Jugador1.CartasEncontradas
-        //        } : null,
-
-        //        Jugador2 = Jugador2 != null ? new JugadorDTO
-        //        {
-        //            Id = Jugador2.Id,
-        //            Nombre = Jugador2.Nombre,
-        //            CartasEncontradas = Jugador2.CartasEncontradas
-        //        } : null,
-
-        //        Turno = TurnoActual,
-        //        CartasDescubiertas = descubiertas.ToArray()
-        //    };
-        //}
 
         public object ObtenerEstadoExtendido()
         {
