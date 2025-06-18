@@ -169,14 +169,13 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
 
             foreach (var par in sesiones)
             {
-                if (par.Value.Sesion.ObtenerCantidadJugadores() < 2)
+                if (par.Value.Sesion.ObtenerCantidadJugadores() <= 2)
                 {
                     partida = par.Value;
                     idSesion = par.Key;
                     break;
                 }
             }
-
 
             if (partida == null)
             {
