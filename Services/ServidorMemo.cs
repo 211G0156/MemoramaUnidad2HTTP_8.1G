@@ -167,9 +167,10 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
             Guid idSesion = Guid.Empty;
             MemoramaViewModel partida = null;
 
+            // Buscar una partida con espacio
             foreach (var par in sesiones)
             {
-                if (par.Value.Sesion.ObtenerCantidadJugadores() <= 2)
+                if (par.Value.Sesion.ObtenerCantidadJugadores() < 2)
                 {
                     partida = par.Value;
                     idSesion = par.Key;
@@ -177,6 +178,7 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
                 }
             }
 
+            // Si no hay ninguna, crear nueva
             if (partida == null)
             {
                 idSesion = Guid.NewGuid();
@@ -188,10 +190,20 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
             var jugador = partida.Conectar(nombre);
             jugadorASesion[jugador.Id] = idSesion;
 
+            // 🔄 Esperar hasta 5 segundos a que haya 2 jugadores
+            int tiempoEsperado = 0;
+            while (partida.Sesion.ObtenerCantidadJugadores() < 2 && tiempoEsperado < 5000)
+            {
+                await Task.Delay(1000); // Espera de 1 segundo
+                tiempoEsperado += 1000;
+            }
+
+            // Enviar respuesta
             var respuesta = new
             {
                 jugadorId = jugador.Id,
-                nombre = jugador.Nombre
+                nombre = jugador.Nombre,
+                jugadoresConectados = partida.Sesion.ObtenerCantidadJugadores()
             };
 
             string json = JsonSerializer.Serialize(respuesta);
@@ -199,6 +211,7 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
             ctx.Response.ContentType = "application/json";
             await ctx.Response.OutputStream.WriteAsync(buffer);
         }
+
 
         private async Task RutaEstado(HttpListenerContext ctx)
         {
