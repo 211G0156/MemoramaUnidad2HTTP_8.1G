@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Text.Json;
 using MemoramaUnidad2HTTP_8._1G.ViewModels;
+using System.Windows;
 
 namespace MemoramaUnidad2HTTP_8._1G.Models
 {
@@ -153,32 +154,39 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
         private async Task RutaConectar(HttpListenerContext ctx)
         {
             using var reader = new StreamReader(ctx.Request.InputStream);
+
             string jsonRecibido = await reader.ReadToEndAsync();
+
             var data = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonRecibido);
 
+
+
             if (!data.ContainsKey("nombre") || string.IsNullOrWhiteSpace(data["nombre"]))
+
             {
+
                 ctx.Response.StatusCode = 400;
+
                 await ctx.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Nombre inválido"));
+
                 return;
+
             }
+
+
 
             string nombre = data["nombre"];
             Guid idSesion = Guid.Empty;
             MemoramaViewModel partida = null;
-
-            // Buscar una partida con espacio
             foreach (var par in sesiones)
             {
-                if (par.Value.Sesion.ObtenerCantidadJugadores() < 2)
+                if (par.Value.Sesion.ObtenerCantidadJugadores() <= 2)
                 {
                     partida = par.Value;
                     idSesion = par.Key;
                     break;
                 }
             }
-
-            // Si no hay ninguna, crear nueva
             if (partida == null)
             {
                 idSesion = Guid.NewGuid();
@@ -186,29 +194,23 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
                 partida = new MemoramaViewModel(nuevaSesion);
                 sesiones[idSesion] = partida;
             }
-
             var jugador = partida.Conectar(nombre);
             jugadorASesion[jugador.Id] = idSesion;
 
-            // 🔄 Esperar hasta 5 segundos a que haya 2 jugadores
-            int tiempoEsperado = 0;
-            while (partida.Sesion.ObtenerCantidadJugadores() < 2 && tiempoEsperado < 5000)
-            {
-                await Task.Delay(1000); // Espera de 1 segundo
-                tiempoEsperado += 1000;
-            }
-
-            // Enviar respuesta
-            var respuesta = new
+             var respuesta = new
             {
                 jugadorId = jugador.Id,
-                nombre = jugador.Nombre,
-                jugadoresConectados = partida.Sesion.ObtenerCantidadJugadores()
+                nombre = jugador.Nombre
             };
 
+
+
             string json = JsonSerializer.Serialize(respuesta);
+
             byte[] buffer = Encoding.UTF8.GetBytes(json);
+
             ctx.Response.ContentType = "application/json";
+
             await ctx.Response.OutputStream.WriteAsync(buffer);
         }
 
@@ -222,14 +224,12 @@ namespace MemoramaUnidad2HTTP_8._1G.Models
                 await ctx.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Id inválido"));
                 return;
             }
-
             if (!jugadorASesion.TryGetValue(jugadorId, out Guid sesionId) || !sesiones.TryGetValue(sesionId, out var partida))
             {
                 ctx.Response.StatusCode = 404;
                 await ctx.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Sesión no encontrada"));
                 return;
             }
-
             var estado = partida.ObtenerEstadoExtendido();
             string json = JsonSerializer.Serialize(estado);
             byte[] buffer = Encoding.UTF8.GetBytes(json);
