@@ -125,7 +125,10 @@
             .cell.flip {
                 animation: girar 0.5s ease forwards;
             }
-
+        .cell {
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
         @keyframes girar {
             0% {
                 transform: rotateY(0deg);
@@ -281,7 +284,6 @@
                 if (carta.mostrando || carta.encontrada) {
                     btn.style.backgroundImage = `url('Assets/Img/${carta.imagen}')`;
                     btn.classList.add("flip");
-
                 } else {
                     btn.style.backgroundImage = "";
                     btn.classList.remove("flip");
@@ -389,6 +391,7 @@
             await actualizarEstado();
             if (!intervalo) {
                 intervalo = setInterval(actualizarEstado, 1000);
+          
             }
         }
         document.querySelectorAll(".cell").forEach(btn => {
@@ -397,10 +400,8 @@
 
                 if (jugadoresConectados < 2) return;
 
-
                 const flipSound = new Audio("Assets/Mus/flipcard.mp3");
                 flipSound.play();
-
 
                 const posicion = btn.getAttribute("data-index");
 
@@ -410,35 +411,35 @@
                 console.log("Respuesta de voltear:", datos);
                 if (datos.exito) {
                     cartasVolteadas++;
-}
+                }
 
-                    await actualizarEstado();
+                await actualizarEstado();
 
-                    if (cartasVolteadas === 2) {
-                        bloqueado = true;
+                if (cartasVolteadas === 2) {
+                    bloqueado = true;
 
-                        setTimeout(async () => {
-                            const antes = paresTotalesAnteriores;
+                    setTimeout(async () => {
+                        const antes = paresTotalesAnteriores;
 
-                            await actualizarEstado();
+                        await actualizarEstado();
 
-                            const despues = (document.getElementById("player1Cards").textContent * 1) +
-                                (document.getElementById("player2Cards").textContent * 1);
+                        const despues = (document.getElementById("player1Cards").textContent * 1) +
+                            (document.getElementById("player2Cards").textContent * 1);
 
-                            if (despues > antes) {
-                                correctSound.play();
-                            } else {
-                                errorSound.play();
-                            }
+                        if (despues > antes) {
+                            correctSound.play();
+                        } else {
+                            errorSound.play();
+                        }
 
-                            paresTotalesAnteriores = despues;
-                            cartasVolteadas = 0;
-                            bloqueado = false;
-                        }, 1000);
-                    }
+                        paresTotalesAnteriores = despues;
+                        cartasVolteadas = 0;
+                        bloqueado = false;
+                    }, 1000);
                 }
             });
         });
+
 
         function reiniciarJuego() {
 
